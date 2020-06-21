@@ -3,6 +3,8 @@ services:
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: es01
+    labels:
+      - co.elastic.logs/enabled=false
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
@@ -22,6 +24,8 @@ services:
   es02:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: es02
+    labels:
+      - co.elastic.logs/enabled=false
     environment:
       - node.name=es02
       - cluster.name=es-docker-cluster
@@ -39,6 +43,8 @@ services:
   es03:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: es03
+    labels:
+      - co.elastic.logs/enabled=false
     environment:
       - node.name=es03
       - cluster.name=es-docker-cluster
@@ -55,6 +61,8 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.8.0
+    labels:
+      - co.elastic.logs/enabled=false
     environment:
       SERVER_NAME: localhost
       ELASTICSEARCH_HOSTS: http://es01:9200
@@ -63,6 +71,8 @@ services:
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.8.0
+    labels:
+      - co.elastic.logs/enabled=false
     environment:
       - ELASTICSEARCH_HOSTS=es01:9200
     mem_limit: 4608m
@@ -78,6 +88,20 @@ services:
     command:
       - "-e"
       - "--strict.perms=false"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.8.0
+    labels:
+      - co.elastic.logs/enabled=false
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    mem_limit: 768m
+    mem_swappiness: 0
+    ports:
+      - 5044:5044
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - ./logstash.conf:/etc/logstash/conf.d/logstash.conf
 
   httpd:
     image: httpd:2.4
